@@ -1,6 +1,6 @@
 # Scout9 Frontend
 
-React + Vite + TypeScript frontend for Scout9 esports scouting tool.
+React + Vite + TypeScript frontend for the Scout9 esports scouting tool. The frontend only talks to the FastAPI backend; it does not connect to Supabase directly.
 
 ## Tech Stack
 
@@ -44,47 +44,23 @@ npm run preview
 
 ```
 frontend/
-├── src/
-│   ├── app/
-│   │   ├── auth/           # Authentication pages
-│   │   │   ├── login/
-│   │   │   ├── signup/
-│   │   │   ├── forgot-password/
-│   │   │   ├── verify-email/
-│   │   │   ├── reset-password/
-│   │   │   └── layout.tsx
-│   │   ├── console/        # Console pages
-│   │   │   ├── dashboard/
-│   │   │   ├── scout/
-│   │   │   ├── report/
-│   │   │   ├── players/
-│   │   │   ├── strategies/
-│   │   │   ├── compositions/
-│   │   │   ├── settings/
-│   │   │   ├── system/
-│   │   │   ├── support/
-│   │   │   └── layout.tsx
-│   │   └── legal/          # Legal pages
-│   │       ├── terms/
-│   │       ├── privacy/
-│   │       ├── cookies/
-│   │       └── layout.tsx
-│   ├── components/
-│   │   ├── app/            # App components
-│   │   │   ├── app-header.tsx
-│   │   │   └── app-footer.tsx
-│   │   ├── console/        # Console components
-│   │   │   ├── console-sidebar.tsx
-│   │   │   └── console-header.tsx
-│   │   └── ui/             # UI components
-│   ├── lib/
-│   │   └── utils.ts
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── public/
-├── index.html
-└── package.json
+|-- src/
+|   |-- app/
+|   |   |-- auth/            # Authentication pages
+|   |   |-- console/         # Console pages
+|   |   |-- legal/           # Legal pages
+|   |-- components/
+|   |   |-- app/             # App components
+|   |   |-- console/         # Console components
+|   |   |-- ui/              # UI components
+|   |-- lib/
+|   |-- services/
+|   |-- App.tsx
+|   |-- main.tsx
+|   |-- index.css
+|-- public/
+|-- index.html
+|-- package.json
 ```
 
 ## Available Routes

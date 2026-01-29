@@ -13,9 +13,11 @@ An automated scouting tool that analyzes official esports match data to generate
 
 ```
 scout9/
-├── frontend/          # React + Vite + TypeScript frontend
-├── backend/           # Backend services (coming soon)
-└── docs/             # Documentation
+|-- frontend/          # React + Vite + TypeScript frontend
+|-- backend/           # FastAPI backend (Supabase Postgres)
+|-- .env.example
+|-- .env.local
+|-- README.md
 ```
 
 ## Getting Started
@@ -26,6 +28,22 @@ scout9/
 cd frontend
 npm install
 npm run dev
+```
+
+### Backend
+
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+Configure `.env.local` at the repo root with your Supabase connection string:
+- `SUPABASE_DB_URL` (service role connection string, include `sslmode=require`)
+
+Run the API:
+
+```bash
+uvicorn app.main:app --reload
 ```
 
 ## Contributing

@@ -1,12 +1,43 @@
+import { useState } from 'react'
 import { ConsoleLayout } from '../layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
-import { Activity, Calendar, Search, Target } from 'lucide-react'
+import { Activity, Calendar, Search, Target, Loader2 } from 'lucide-react'
+import { scoutService } from '@/services/scout.service'
 
 export default function Scout() {
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setSuccess(false)
+
+    const formData = new FormData(e.currentTarget)
+    const teamName = formData.get('teamName') as string
+    const matchId = formData.get('matchId') as string
+    const dateFrom = formData.get('dateFrom') as string
+    const dateTo = formData.get('dateTo') as string
+
+    try {
+      await scoutService.run({
+        team_name: teamName,
+        match_id: matchId || undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
+      })
+      setSuccess(true)
+    } catch (error) {
+      console.error('Failed to start scouting:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
@@ -26,11 +57,12 @@ export default function Scout() {
                 <h2 className="text-xl font-semibold">Scout Configuration</h2>
               </div>
 
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div>
                   <Label htmlFor="teamName">Opponent Team *</Label>
                   <Input
                     id="teamName"
+                    name="teamName"
                     type="text"
                     placeholder="Enter team name or ID"
                     className="mt-2"
@@ -45,6 +77,7 @@ export default function Scout() {
                   <Label htmlFor="matchId">Match ID (Optional)</Label>
                   <Input
                     id="matchId"
+                    name="matchId"
                     type="text"
                     placeholder="Specific match ID to analyze"
                     className="mt-2"
@@ -60,6 +93,7 @@ export default function Scout() {
                     <div className="relative mt-2">
                       <Input
                         id="dateFrom"
+                        name="dateFrom"
                         type="date"
                         className="pl-10"
                       />
@@ -72,6 +106,7 @@ export default function Scout() {
                     <div className="relative mt-2">
                       <Input
                         id="dateTo"
+                        name="dateTo"
                         type="date"
                         className="pl-10"
                       />
@@ -82,7 +117,7 @@ export default function Scout() {
 
                 <div>
                   <Label htmlFor="analysisDepth">Analysis Depth</Label>
-                  <Select id="analysisDepth" className="mt-2">
+                  <Select id="analysisDepth" name="analysisDepth" className="mt-2">
                     <option value="quick">Quick Scan</option>
                     <option value="standard">Standard Analysis</option>
                     <option value="deep">Deep Analysis</option>
@@ -94,7 +129,7 @@ export default function Scout() {
 
                 <div>
                   <Label htmlFor="focus">Focus Areas</Label>
-                  <Select id="focus" className="mt-2">
+                  <Select id="focus" name="focus" className="mt-2">
                     <option value="all">All Areas</option>
                     <option value="players">Player Performance</option>
                     <option value="strategies">Team Strategies</option>
@@ -102,10 +137,20 @@ export default function Scout() {
                   </Select>
                 </div>
 
+                {success && (
+                  <div className="p-3 bg-green-50 text-green-700 rounded-md text-sm">
+                    Scouting analysis started successfully!
+                  </div>
+                )}
+
                 <div className="pt-4">
-                  <Button type="submit" className="w-full" size="lg">
-                    <Activity className="w-4 h-4 mr-2" />
-                    Start Scouting Analysis
+                  <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Activity className="w-4 h-4 mr-2" />
+                    )}
+                    {loading ? 'Starting Analysis...' : 'Start Scouting Analysis'}
                   </Button>
                 </div>
               </form>

@@ -1,12 +1,12 @@
 # Scout9 Backend
 
-FastAPI backend for Scout9 esports scouting tool.
+FastAPI backend for the Scout9 esports scouting tool. The backend fetches raw match data from GRID, performs analysis, and stores structured results in Supabase Postgres.
 
 ## Tech Stack
 
 - FastAPI
 - Python 3.10+
-- SQLAlchemy (SQLite/PostgreSQL)
+- SQLAlchemy + psycopg2 (Supabase Postgres)
 - GRID API integration
 - Pydantic for data validation
 
@@ -14,40 +14,18 @@ FastAPI backend for Scout9 esports scouting tool.
 
 ```
 backend/
-├── app/
-│   ├── main.py              # App entry point
-│   │
-│   ├── core/
-│   │   ├── config.py        # Environment variables
-│   │   └── database.py      # DB connection
-│   │
-│   ├── api/
-│   │   ├── scout.py         # Scouting endpoints
-│   │   ├── report.py        # Report endpoints
-│   │   ├── players.py       # Player endpoints
-│   │   ├── strategies.py    # Strategy endpoints
-│   │   ├── compositions.py  # Composition endpoints
-│   │   ├── system.py        # System endpoints
-│   │   └── settings.py      # Settings endpoints
-│   │
-│   ├── services/
-│   │   ├── grid_service.py  # GRID API integration
-│   │   ├── analysis.py      # Data analysis logic
-│   │   └── insights.py      # Insight generation
-│   │
-│   ├── models/
-│   │   └── report.py        # Database models
-│   │
-│   ├── schemas/
-│   │   ├── scout.py         # Pydantic schemas
-│   │   └── report.py
-│   │
-│   └── utils/
-│       └── cache.py         # Simple caching
-│
-├── requirements.txt
-├── .env.example
-└── README.md
+|-- app/
+|   |-- main.py              # App entry point
+|   |-- core/
+|   |   |-- config.py        # Environment variables
+|   |   |-- database.py      # DB connection
+|   |-- api/                 # API routes
+|   |-- services/            # GRID + analysis logic
+|   |-- models/              # SQLAlchemy models
+|   |-- schemas/             # Pydantic schemas
+|   |-- utils/               # Utilities (cache)
+|-- requirements.txt
+|-- README.md
 ```
 
 ## Getting Started
@@ -60,16 +38,12 @@ pip install -r requirements.txt
 
 ### 2. Configure Environment
 
-Copy `.env.example` to `.env` and configure:
+Copy the root `.env.example` to `.env.local` and set:
+- `SUPABASE_DB_URL` (Supabase service role connection string, include `sslmode=require`)
+- `GRID_API_KEY`
+- `SECRET_KEY`
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration:
-- Add your GRID API key
-- Configure database URL
-- Set secret key
+The backend will use `SUPABASE_DB_URL` when present and fall back to `DATABASE_URL` for local SQLite.
 
 ### 3. Run Development Server
 
@@ -139,21 +113,13 @@ API documentation: `http://localhost:8000/docs`
 
 ## Development
 
-### Database Migrations
+### Database Initialization
 
-Initialize database:
+Create tables in Supabase Postgres:
 
 ```python
 from app.core.database import init_db
 init_db()
-```
-
-### Testing GRID API
-
-Set your GRID API key in `.env`:
-
-```
-GRID_API_KEY=your_api_key_here
 ```
 
 ## Contributing
