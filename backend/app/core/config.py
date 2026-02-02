@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # Database
-    SUPABASE_DB_URL: Optional[str] = None
     DATABASE_URL: str = "sqlite:///./scout9.db"
 
     # GRID API
