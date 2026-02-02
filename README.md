@@ -67,13 +67,13 @@ scout9/
    Then edit `.env.local` with your actual credentials:
    ```env
    # Required: Get from https://supabase.com
-   SUPABASE_DB_URL=postgresql://postgres.[project-ref]:[your-password]@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+   SUPABASE_DB_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@[HOST].pooler.supabase.com:6543/postgres?sslmode=require
    
    # Required: Get from https://grid.gg/developers
-   GRID_API_KEY=your_actual_grid_api_key_here
+   GRID_API_KEY=your_grid_api_key_here
    
    # Required: Generate with: openssl rand -hex 32
-   SECRET_KEY=generate-a-strong-random-key-minimum-32-characters
+   SECRET_KEY=your_secret_key_here_min_32_chars
    ```
    
    **⚠️ IMPORTANT:** Never commit `.env.local` to git! It's already in `.gitignore`.
@@ -101,12 +101,13 @@ scout9/
 
 2. **Configure environment (optional):**
    
-   Frontend environment variables are in `.env.local` (same file at repo root).
+   Frontend uses the same `.env.local` file at repo root.
    Update if needed:
    ```env
    VITE_API_URL=http://localhost:8000
    ```
-� Environment Variables
+
+## 🔐 Environment Variables
 
 All configuration is done via `.env.local` file at the project root. See [`.env.example`](.env.example) for the complete template.
 
