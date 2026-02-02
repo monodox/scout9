@@ -6,7 +6,10 @@ export function AppFooter() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-bold text-lg mb-4">Scout9</h3>
+            <div className="flex items-center space-x-2 mb-4">
+              <img src="/icons/icon.png" alt="Scout9" className="h-8 w-8" />
+              <h3 className="font-bold text-lg">Scout9</h3>
+            </div>
             <p className="text-sm text-muted-foreground">
               Automated esports scouting tool for coaches and analysts.
             </p>

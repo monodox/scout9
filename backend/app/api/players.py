@@ -17,8 +17,6 @@ async def list_players(report_id: Optional[UUID] = None, skip: int = 0, limit: i
     List all players analyzed in scouting reports.
     If report_id is provided, filter by that report. Otherwise, return all players.
     This is a derived view - players are extracted from GRID data during scouting.
-    
-    Auto-seeds sample data if database is empty.
     """
     query = db.query(ReportPlayer)
     
@@ -26,13 +24,6 @@ async def list_players(report_id: Optional[UUID] = None, skip: int = 0, limit: i
         query = query.filter(ReportPlayer.report_id == report_id)
     
     total = query.count()
-    
-    # Auto-seed sample data if database is empty
-    if total == 0:
-        from app.api.test_data import seed_sample_data
-        seed_sample_data(db)
-        total = query.count()
-    
     players = query.offset(skip).limit(limit).all()
     
     return {

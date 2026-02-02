@@ -1,6 +1,6 @@
 # Scout9
 
-An automated scouting tool that analyzes official esports match data to generate concise, coach-ready opponent reports highlighting strategies, player tendencies, and composition patterns.
+Automated opponent scouting powered by official esports data.
 
 **🔓 Open Source Project** - This is a public repository. Never commit credentials, API keys, or secrets. All sensitive configuration goes in `.env.local` which is git-ignored.
 

@@ -37,7 +37,7 @@ class GRIDGraphQLClient:
     def _get_headers(self) -> Dict[str, str]:
         """Get authentication headers for GRID API"""
         return {
-            "Authorization": f"Bearer {self.api_key}" if self.api_key else "",
+            "x-api-key": self.api_key if self.api_key else "",
             "Content-Type": "application/json"
         }
 

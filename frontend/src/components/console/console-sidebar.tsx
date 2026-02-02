@@ -35,6 +35,7 @@ export function ConsoleSidebar() {
       <div className="flex h-full flex-col">
         <div className="flex h-16 items-center border-b border-border px-6">
           <Link to="/" className="flex items-center space-x-2">
+            <img src="/icons/icon.png" alt="Scout9" className="h-8 w-8" />
             <span className="text-xl font-bold">Scout9</span>
           </Link>
         </div>

@@ -3,14 +3,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-# Database: Storage layer for processed analysis results
-# Uses SQLite for local development, can be swapped for PostgreSQL
-database_url = settings.DATABASE_URL
+# Database: Supabase PostgreSQL only
+database_url = settings.SUPABASE_DB_URL
 
 engine = create_engine(
     database_url,
-    connect_args={"check_same_thread": False} if "sqlite" in database_url else {},
-    pool_pre_ping=True
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

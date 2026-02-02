@@ -6,6 +6,7 @@ export function AppHeader() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
+            <img src="/icons/icon.png" alt="Scout9" className="h-8 w-8" />
             <span className="text-2xl font-bold">Scout9</span>
           </Link>
 

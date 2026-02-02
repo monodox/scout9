@@ -5,32 +5,67 @@ import { Link } from 'react-router-dom'
 import { ConsoleLayout } from '../layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Activity, TrendingUp, AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
+import { Activity, TrendingUp, AlertCircle, BarChart3, RefreshCw, Radio, Trophy, Clock } from 'lucide-react'
 import { systemService } from '@/services/system.service'
-import { reportService } from '@/services/report.service'
+import { gridService, GridMatch, GridTournament, GridOrganization, GridTeam, GridPlayer } from '@/services/grid.service'
 
 export default function Dashboard() {
   const [overview, setOverview] = useState<any>(null)
-  const [recentReports, setRecentReports] = useState<any[]>([])
+  const [matches, setMatches] = useState<GridMatch[]>([])
+  const [tournaments, setTournaments] = useState<GridTournament[]>([])
+  const [organizations, setOrganizations] = useState<GridOrganization[]>([])
+  const [teams, setTeams] = useState<GridTeam[]>([])
+  const [players, setPlayers] = useState<GridPlayer[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchDashboardData()
+    // Refresh live data every 60 seconds
+    const interval = setInterval(fetchLiveData, 60000)
+    return () => clearInterval(interval)
   }, [])
 
   const fetchDashboardData = async () => {
     try {
-      const [overviewData, reportsData] = await Promise.all([
-        systemService.getOverview(),
-        reportService.list(0, 5)
-      ])
+      const overviewData = await systemService.getOverview()
       setOverview(overviewData)
-      setRecentReports(reportsData.reports || [])
+      await fetchLiveData()
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchLiveData = async () => {
+    try {
+      const [matchesData, tournamentsData, organizationsData, teamsData, playersData] = await Promise.all([
+        gridService.getMatches(),
+        gridService.getTournaments(),
+        gridService.getOrganizations(),
+        gridService.getTeams(),
+        gridService.getPlayers()
+      ])
+      setMatches(matchesData.matches || [])
+      setTournaments(tournamentsData.tournaments || [])
+      setOrganizations(organizationsData.organizations || [])
+      setTeams(teamsData.teams || [])
+      setPlayers(playersData.players || [])
+    } catch (err) {
+      console.error('Failed to fetch GRID data:', err)
+    }
+  }
+
+  const formatTime = (isoString: string) => {
+    const date = new Date(isoString)
+    const now = new Date()
+    const diff = date.getTime() - now.getTime()
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    
+    if (diff < 0) return 'Live Now'
+    if (hours === 0) return `Starts in ${minutes}m`
+    return `Starts in ${hours}h ${minutes}m`
   }
 
   if (loading) {
@@ -52,7 +87,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground mt-1">
-              Overview of recent scouting analyses, key trends, and system status.
+              Live esports data and scouting statistics.
             </p>
           </div>
           <Link to="/console/scout">
@@ -64,6 +99,201 @@ export default function Dashboard() {
         </div>
 
         <div className="space-y-6">
+          {/* Grid Statistics Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-primary">{matches.length}</p>
+                  <p className="text-xs text-muted-foreground">Series</p>
+                </div>
+                <Activity className="w-8 h-8 text-muted-foreground" />
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-primary">{tournaments.length}</p>
+                  <p className="text-xs text-muted-foreground">Tournaments</p>
+                </div>
+                <Trophy className="w-8 h-8 text-muted-foreground" />
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-primary">{teams.length}</p>
+                  <p className="text-xs text-muted-foreground">Teams</p>
+                </div>
+                <BarChart3 className="w-8 h-8 text-muted-foreground" />
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-2xl font-bold text-primary">{players.length}</p>
+                  <p className="text-xs text-muted-foreground">Players</p>
+                </div>
+                <Activity className="w-8 h-8 text-muted-foreground" />
+              </div>
+            </Card>
+          </div>
+
+          {/* Series (Matches) */}
+          {matches.length > 0 && (
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Radio className="w-5 h-5 text-primary" />
+                  Recent Series
+                </h2>
+                <Button variant="ghost" size="sm" onClick={fetchLiveData}>
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {matches.slice(0, 6).map((match) => (
+                  <Card key={match.id} className="p-4 hover:bg-accent transition-colors">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                          Series
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          ID: {match.id}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm mb-2">
+                          {match.name}
+                        </div>
+                        {match.startTimeScheduled && (
+                          <div className="text-xs text-muted-foreground">
+                            Start: {new Date(match.startTimeScheduled).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Tournaments */}
+          {tournaments.length > 0 && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-primary" />
+                Tournaments
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {tournaments.slice(0, 6).map((tournament) => (
+                  <Card key={tournament.id} className="p-4 hover:bg-accent transition-colors">
+                    <div className="space-y-2">
+                      <div className="font-medium">{tournament.name}</div>
+                      {tournament.nameShortened && (
+                        <div className="text-sm text-muted-foreground">{tournament.nameShortened}</div>
+                      )}
+                      <div className="text-xs text-muted-foreground">ID: {tournament.id}</div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Organizations */}
+          {organizations.length > 0 && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                Esports Organizations
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {organizations.slice(0, 6).map((org) => (
+                  <Card key={org.id} className="p-4 hover:bg-accent transition-colors">
+                    <div className="space-y-2">
+                      <div className="font-medium">{org.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {org.teams.length} teams
+                      </div>
+                      {org.teams.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          Teams: {org.teams.slice(0, 3).map(team => team.name).join(', ')}
+                          {org.teams.length > 3 ? '...' : ''}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Teams */}
+          {teams.length > 0 && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-primary" />
+                Teams
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {teams.slice(0, 8).map((team) => (
+                  <Card key={team.id} className="p-4 hover:bg-accent transition-colors">
+                    <div className="space-y-2">
+                      <div className="font-medium text-sm">{team.name}</div>
+                      <div className="flex items-center gap-2">
+                        {team.colorPrimary && (
+                          <div 
+                            className="w-4 h-4 rounded-full border" 
+                            style={{ backgroundColor: team.colorPrimary }}
+                          ></div>
+                        )}
+                        {team.colorSecondary && (
+                          <div 
+                            className="w-4 h-4 rounded-full border" 
+                            style={{ backgroundColor: team.colorSecondary }}
+                          ></div>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">ID: {team.id}</div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Players */}
+          {players.length > 0 && (
+            <section>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Players
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {players.slice(0, 12).map((player) => (
+                  <Card key={player.id} className="p-4 hover:bg-accent transition-colors">
+                    <div className="space-y-2">
+                      <div className="font-medium text-sm">{player.name}</div>
+                      {(player.firstName || player.lastName) && (
+                        <div className="text-xs text-muted-foreground">
+                          {player.firstName} {player.lastName}
+                        </div>
+                      )}
+                      {player.nationality && (
+                        <div className="text-xs text-muted-foreground">
+                          {player.nationality}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Statistics Overview */}
           <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="p-6">
@@ -105,136 +335,6 @@ export default function Dashboard() {
                 <AlertCircle className="w-8 h-8 text-primary opacity-20" />
               </div>
             </Card>
-          </section>
-
-          {/* Recent Reports */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Recent Reports</h2>
-              <Link to="/console/report">
-                <Button variant="ghost" size="sm">View All</Button>
-              </Link>
-            </div>
-            <Card className="p-6">
-              {recentReports.length > 0 ? (
-                <div className="space-y-3">
-                  {recentReports.map((report) => (
-                    <Link key={report.id} to={`/console/report/${report.id}`}>
-                      <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors">
-                        <div>
-                          <div className="font-medium">{report.title || report.team_name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(report.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <div className={`text-sm px-3 py-1 rounded-full ${
-                          report.status === 'completed' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}>
-                          {report.status}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground mb-4">No reports yet. Run a new scout analysis to get started.</p>
-                  <Link to="/console/scout">
-                    <Button>Start Your First Scout</Button>
-                  </Link>
-                </div>
-              )}
-            </Card>
-          </section>
-
-          {/* Key Trends */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Key Trends</h2>
-              <div className="space-y-4">
-                <div className="text-center py-8">
-                  <TrendingUp className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-sm text-muted-foreground">
-                    Trends will appear after analyzing scouting data
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* System Health */}
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">System Health</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-md">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-sm">API Status</span>
-                  </div>
-                  <span className="text-sm font-medium text-green-600">Operational</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-md">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                    <span className="text-sm">Database</span>
-                  </div>
-                  <span className="text-sm font-medium text-green-600">Connected</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
-                    <span className="text-sm">GRID API</span>
-                  </div>
-                  <span className="text-sm font-medium text-yellow-600">Not Configured</span>
-                </div>
-
-                <Link to="/console/system">
-                  <Button variant="outline" size="sm" className="w-full mt-4">
-                    View System Details
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          </section>
-
-          {/* Quick Actions */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Link to="/console/scout">
-                <Card className="p-6 hover:bg-accent transition-colors cursor-pointer">
-                  <Activity className="w-8 h-8 text-primary mb-3" />
-                  <h3 className="font-semibold mb-2">New Scout Analysis</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Start a new opponent scouting run
-                  </p>
-                </Card>
-              </Link>
-
-              <Link to="/console/report">
-                <Card className="p-6 hover:bg-accent transition-colors cursor-pointer">
-                  <BarChart3 className="w-8 h-8 text-primary mb-3" />
-                  <h3 className="font-semibold mb-2">View Reports</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Access generated scouting reports
-                  </p>
-                </Card>
-              </Link>
-
-              <Link to="/console/players">
-                <Card className="p-6 hover:bg-accent transition-colors cursor-pointer">
-                  <TrendingUp className="w-8 h-8 text-primary mb-3" />
-                  <h3 className="font-semibold mb-2">Player Insights</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Analyze player performance data
-                  </p>
-                </Card>
-              </Link>
-            </div>
           </section>
         </div>
       </div>
