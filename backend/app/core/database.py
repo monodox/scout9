@@ -3,9 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
-# Supabase Postgres: Storage layer only (no analysis performed here)
-# Stores processed results from FastAPI analysis services
-database_url = settings.SUPABASE_DB_URL or settings.DATABASE_URL
+# Database: Storage layer for processed analysis results
+# Uses SQLite for local development, can be swapped for PostgreSQL
+database_url = settings.DATABASE_URL
 
 engine = create_engine(
     database_url,
