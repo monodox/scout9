@@ -22,7 +22,7 @@ class Report(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     status = Column(String(50), default="pending")  # pending, processing, completed, failed
     summary_json = Column(JSON, nullable=True)  # AI-generated insights and summary
-    metadata = Column(JSON, nullable=True)  # Additional flexible fields
+    extra_data = Column(JSON, nullable=True)  # Additional flexible fields (renamed from metadata)
 
     # Relationships
     players = relationship("ReportPlayer", back_populates="report", cascade="all, delete-orphan")
