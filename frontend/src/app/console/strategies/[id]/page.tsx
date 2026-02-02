@@ -19,7 +19,7 @@ export default function StrategyDetail() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Strategy Analysis</h1>
-            <p className="text-muted-foreground mt-1">Strategy ID: {id}</p>
+            <p className="text-muted-foreground mt-1">Common team strategies, site preferences, and macro patterns identified from match data.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -39,6 +39,11 @@ export default function StrategyDetail() {
 
           <div className="border border-border rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Strategy Overview</h2>
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                Repeated patterns detected across multiple matches.
+              </p>
+            </div>
             <p className="text-muted-foreground">
               Detailed strategy description and usage context will appear here.
             </p>

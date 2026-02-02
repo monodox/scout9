@@ -19,7 +19,7 @@ export default function PlayerDetail() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Player Analysis</h1>
-            <p className="text-muted-foreground mt-1">Player ID: {id}</p>
+            <p className="text-muted-foreground mt-1">Individual player tendencies, roles, and behavior patterns derived from recent matches.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -43,13 +43,13 @@ export default function PlayerDetail() {
               <div>
                 <h3 className="font-medium mb-2">Playstyle</h3>
                 <p className="text-sm text-muted-foreground">
-                  Player tendencies and playstyle analysis will appear here.
+                  No player data available for this report.
                 </p>
               </div>
               <div>
                 <h3 className="font-medium mb-2">Preferred Positions</h3>
                 <p className="text-sm text-muted-foreground">
-                  Position preferences and performance data will appear here.
+                  No player data available for this report.
                 </p>
               </div>
             </div>

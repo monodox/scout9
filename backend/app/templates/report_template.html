@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout9 Report - {{ team_name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
+            padding: 40px;
+        }
+        
+        .header {
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+        
+        .header .meta {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 35px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .summary {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+            margin-bottom: 25px;
+        }
+        
+        .summary p {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+        
+        .player-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .player-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .player-role {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .stat {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .tendencies {
+            margin-top: 12px;
+        }
+        
+        .tendency-tag {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        
+        .strategy-card, .comp-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        
+        .strategy-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .strategy-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        .comp-picks {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        
+        .agent-badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+        }
+        
+        @media print {
+            body {
+                padding: 20px;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Scout9 Scouting Report</h1>
+        <div class="meta">
+            Team: <strong>{{ team_name }}</strong> | 
+            Game: <strong>{{ game }}</strong> | 
+            Generated: <strong>{{ created_at }}</strong> |
+            Matches Analyzed: <strong>{{ match_count }}</strong>
+        </div>
+    </div>
+
+    {% if summary %}
+    <div class="summary">
+        {{ summary | safe }}
+    </div>
+    {% endif %}
+
+    {% if players %}
+    <div class="section">
+        <h2 class="section-title">Player Analysis</h2>
+        {% for player in players %}
+        <div class="player-card">
+            <div class="player-header">
+                <span class="player-name">{{ player.player_name }}</span>
+                {% if player.role %}
+                <span class="player-role">{{ player.role }}</span>
+                {% endif %}
+            </div>
+            
+            {% if player.metrics_json %}
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="stat-label">K/D</div>
+                    <div class="stat-value">{{ "%.2f"|format(player.metrics_json.kd_ratio or 0) }}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Kills</div>
+                    <div class="stat-value">{{ "%.1f"|format(player.metrics_json.avg_kills or 0) }}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Assists</div>
+                    <div class="stat-value">{{ "%.1f"|format(player.metrics_json.avg_assists or 0) }}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Consistency</div>
+                    <div class="stat-value">{{ "%.0f%%"|format((player.metrics_json.consistency or 0) * 100) }}</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if player.tendencies_json and player.tendencies_json.labels %}
+            <div class="tendencies">
+                {% for tendency in player.tendencies_json.labels %}
+                <span class="tendency-tag">{{ tendency }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if strategies %}
+    <div class="section">
+        <h2 class="section-title">Strategic Patterns</h2>
+        {% for strategy in strategies %}
+        <div class="strategy-card">
+            <div class="strategy-label">{{ strategy.label }}</div>
+            <div class="strategy-stats">
+                <span>Category: <strong>{{ strategy.category }}</strong></span>
+                <span>Success Rate: <strong>{{ "%.1f%%"|format((strategy.success_rate or 0) * 100) }}</strong></span>
+                <span>Frequency: <strong>{{ strategy.frequency }}</strong></span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if compositions %}
+    <div class="section">
+        <h2 class="section-title">Team Compositions</h2>
+        {% for comp in compositions %}
+        <div class="comp-card">
+            <div class="strategy-stats">
+                <span>Win Rate: <strong>{{ "%.1f%%"|format((comp.win_rate or 0) * 100) }}</strong></span>
+                <span>Sample Size: <strong>{{ comp.sample_size }} games</strong></span>
+            </div>
+            {% if comp.picks_json and comp.picks_json.picks %}
+            <div class="comp-picks">
+                {% for agent in comp.picks_json.picks[:5] %}
+                <span class="agent-badge">{{ agent }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Generated by Scout9 - Automated Esports Scouting | Confidential Report</p>
+    </div>
+</body>
+</html>

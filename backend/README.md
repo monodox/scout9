@@ -30,26 +30,59 @@ backend/
 
 ## Getting Started
 
-### 1. Install Dependencies
+### 1. Prerequisites
 
-```bash
-pip install -r requirements.txt
-```
+- Python 3.10+
+- Virtual environment (recommended)
 
 ### 2. Configure Environment
 
-Copy the root `.env.example` to `.env.local` and set:
+Copy the root `.env.example` to `.env.local` in the project root and set the required variables:
 - `SUPABASE_DB_URL` (Supabase service role connection string, include `sslmode=require`)
 - `GRID_API_KEY`
 - `SECRET_KEY`
 
 The backend will use `SUPABASE_DB_URL` when present and fall back to `DATABASE_URL` for local SQLite.
 
-### 3. Run Development Server
+### 3. Setup and Run
 
-```bash
-uvicorn app.main:app --reload
-```
+#### Windows
+
+1. Create a virtual environment:
+   ```powershell
+   python -m venv venv
+   ```
+2. Activate the virtual environment:
+   ```powershell
+   .\venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```powershell
+   pip install -r requirements.txt
+   ```
+4. Run the development server:
+   ```powershell
+   uvicorn app.main:app --reload
+   ```
+
+#### macOS / Linux
+
+1. Create a virtual environment:
+   ```bash
+   python3 -m venv venv
+   ```
+2. Activate the virtual environment:
+   ```bash
+   source venv/bin/activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Run the development server:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
 The API will be available at `http://localhost:8000`
 

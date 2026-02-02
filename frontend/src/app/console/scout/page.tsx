@@ -42,9 +42,9 @@ export default function Scout() {
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Scout Analysis</h1>
+          <h1 className="text-3xl font-bold">Scout Opponent</h1>
           <p className="text-muted-foreground mt-1">
-            Configure an opponent and generate a new automated scouting analysis
+            Select an opponent and generate an automated scouting analysis based on recent matches.
           </p>
         </div>
 
@@ -59,7 +59,7 @@ export default function Scout() {
 
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div>
-                  <Label htmlFor="teamName">Opponent Team *</Label>
+                  <Label htmlFor="teamName">Opponent *</Label>
                   <Input
                     id="teamName"
                     name="teamName"
@@ -69,7 +69,7 @@ export default function Scout() {
                     required
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Team to analyze and scout
+                    Team to analyze
                   </p>
                 </div>
 
@@ -84,6 +84,33 @@ export default function Scout() {
                   />
                   <p className="text-sm text-muted-foreground mt-1">
                     Leave empty to analyze all recent matches
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="game">Game *</Label>
+                  <Select id="game" name="game" className="mt-2" required>
+                    <option value="">Select a game</option>
+                    <option value="valorant">VALORANT</option>
+                    <option value="lol">League of Legends</option>
+                  </Select>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    VALORANT or League of Legends
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="matchRange">Match Range</Label>
+                  <Input
+                    id="matchRange"
+                    name="matchRange"
+                    type="number"
+                    placeholder="10"
+                    className="mt-2"
+                    defaultValue="10"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Number of recent matches to include
                   </p>
                 </div>
 
@@ -150,7 +177,7 @@ export default function Scout() {
                     ) : (
                       <Activity className="w-4 h-4 mr-2" />
                     )}
-                    {loading ? 'Starting Analysis...' : 'Start Scouting Analysis'}
+                    {loading ? 'Analyzing match data and generating insights…' : 'Generate Report'}
                   </Button>
                 </div>
               </form>

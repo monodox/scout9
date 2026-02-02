@@ -19,7 +19,7 @@ export default function CompositionDetail() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Composition Analysis</h1>
-            <p className="text-muted-foreground mt-1">Composition ID: {id}</p>
+            <p className="text-muted-foreground mt-1">Frequently used agent or champion compositions and their effectiveness.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -61,6 +61,7 @@ export default function CompositionDetail() {
 
           <div className="border border-border rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Pick Trends</h2>
+            <p className="text-xs text-muted-foreground mb-3">Based on recent match picks and outcomes.</p>
             <p className="text-muted-foreground">
               Historical pick trends and meta evolution will be shown here.
             </p>

@@ -8,9 +8,9 @@ export default function System() {
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">System</h1>
+          <h1 className="text-3xl font-bold">System Status</h1>
           <p className="text-muted-foreground mt-1">
-            Monitor system health, performance, and service status
+            Monitor data sources, processing status, and application health.
           </p>
         </div>
 
@@ -65,22 +65,11 @@ export default function System() {
                   <div className="flex items-center">
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
                     <div>
-                      <div className="font-medium">API Server</div>
+                      <div className="font-medium">Backend</div>
                       <div className="text-sm text-muted-foreground">Response time: 45ms</div>
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-green-600">Operational</span>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <div>
-                      <div className="font-medium">Database</div>
-                      <div className="text-sm text-muted-foreground">Queries: 1,234 / hour</div>
-                    </div>
-                  </div>
-                  <span className="text-sm font-medium text-green-600">Connected</span>
+                  <span className="text-sm font-medium text-green-600">Healthy</span>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
@@ -91,7 +80,18 @@ export default function System() {
                       <div className="text-sm text-muted-foreground">API key required</div>
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-yellow-600">Not Configured</span>
+                  <span className="text-sm font-medium text-yellow-600">Unavailable</span>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <div>
+                      <div className="font-medium">Cache</div>
+                      <div className="text-sm text-muted-foreground">Hit rate: 94%</div>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-green-600">Active</span>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">

@@ -20,7 +20,7 @@ export default function ReportDetail() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Scouting Report</h1>
-              <p className="text-muted-foreground mt-1">Report ID: {id}</p>
+              <p className="text-muted-foreground mt-1">High-level summary and key insights derived from the selected scouting analysis.</p>
             </div>
             <div className="flex gap-2">
               <button className="px-4 py-2 border border-border rounded-md hover:bg-accent">
@@ -33,7 +33,7 @@ export default function ReportDetail() {
           </div>
 
           <div className="border border-border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Report Summary</h2>
+            <h2 className="text-xl font-semibold mb-4">Team Overview</h2>
             <div className="space-y-4">
               <div>
                 <div className="text-sm text-muted-foreground">Team</div>
@@ -53,7 +53,14 @@ export default function ReportDetail() {
           <div className="border border-border rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Key Insights</h2>
             <p className="text-muted-foreground">
-              Report insights will be displayed here once analysis is complete.
+              Report data is still being processed or unavailable.
+            </p>
+          </div>
+
+          <div className="border border-border rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Performance Trends</h2>
+            <p className="text-muted-foreground">
+              Performance trends will be displayed here once analysis is complete.
             </p>
           </div>
 

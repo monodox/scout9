@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import scout, report, players, strategies, compositions, system, settings, support
+from app.api import scout, report, players, strategies, compositions, system, settings, support, auth
 
 app = FastAPI(
     title="Scout9 API",
@@ -18,6 +18,7 @@ app.add_middleware(
 )
 
 # Register routers
+app.include_router(auth.router)
 app.include_router(scout.router)
 app.include_router(report.router)
 app.include_router(players.router)

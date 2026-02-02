@@ -12,7 +12,7 @@ export default function Dashboard() {
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground mt-1">
-              Overview of recent scouting runs, key trends, and system health
+              Overview of recent scouting analyses, key trends, and system status.
             </p>
           </div>
           <Link to="/console/scout">
@@ -67,10 +67,10 @@ export default function Dashboard() {
             </Card>
           </section>
 
-          {/* Recent Scouting Runs */}
+          {/* Recent Reports */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Recent Scouting Runs</h2>
+              <h2 className="text-xl font-semibold">Recent Reports</h2>
               <Link to="/console/scout">
                 <Button variant="ghost" size="sm">View All</Button>
               </Link>
@@ -78,7 +78,7 @@ export default function Dashboard() {
             <Card className="p-6">
               <div className="text-center py-12">
                 <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">No scouting runs yet</p>
+                <p className="text-muted-foreground mb-4">No reports yet. Run a new scout analysis to get started.</p>
                 <Link to="/console/scout">
                   <Button>Start Your First Scout</Button>
                 </Link>

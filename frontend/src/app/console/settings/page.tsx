@@ -6,15 +6,22 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select } from '@/components/ui/select'
 import { User, Bell, Key, Database, Palette, Globe } from 'lucide-react'
+import { useState } from 'react'
 
 export default function Settings() {
+  const [saveSuccess, setSaveSuccess] = useState(false)
+
+  const handleSave = () => {
+    setSaveSuccess(true)
+    setTimeout(() => setSaveSuccess(false), 3000)
+  }
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground mt-1">
-            Manage your account preferences and application settings
+            Configure analysis defaults and application preferences.
           </p>
         </div>
 
@@ -209,8 +216,13 @@ export default function Settings() {
           </Card>
 
           {/* Actions */}
+          {saveSuccess && (
+            <div className="p-3 bg-green-50 text-green-700 rounded-md text-sm">
+              Settings updated successfully.
+            </div>
+          )}
           <div className="flex gap-4">
-            <Button>Save Changes</Button>
+            <Button onClick={handleSave}>Save Changes</Button>
             <Button variant="outline">Reset to Defaults</Button>
           </div>
         </div>

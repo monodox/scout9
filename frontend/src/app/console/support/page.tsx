@@ -6,15 +6,23 @@ import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { HelpCircle, MessageSquare, Book, FileQuestion, Mail, Github, MessageCircle } from 'lucide-react'
+import { useState } from 'react'
 
 export default function Support() {
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSubmitSuccess(true)
+    setTimeout(() => setSubmitSuccess(false), 5000)
+  }
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Support</h1>
           <p className="text-muted-foreground mt-1">
-            Get help and support for Scout9
+            Get help, report issues, or contact the Scout9 team.
           </p>
         </div>
 
@@ -26,7 +34,12 @@ export default function Support() {
                 <MessageSquare className="w-5 h-5 mr-2 text-primary" />
                 <h2 className="text-xl font-semibold">Contact Support</h2>
               </div>
-              <form className="space-y-4">
+              {submitSuccess && (
+                <div className="mb-4 p-3 bg-green-50 text-green-700 rounded-md text-sm">
+                  Your request has been submitted.
+                </div>
+              )}
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
                   <Label htmlFor="subject">Subject *</Label>
                   <Input
@@ -64,10 +77,13 @@ export default function Support() {
                   <Textarea
                     id="message"
                     rows={6}
-                    placeholder="Describe your issue or question in detail..."
+                    placeholder="Describe the issue or question in detail."
                     className="mt-2"
                     required
                   />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Describe the issue or question in detail.
+                  </p>
                 </div>
 
                 <div>
