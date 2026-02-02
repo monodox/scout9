@@ -1,13 +1,14 @@
 import { api } from '@/lib/api'
 
 export interface Player {
-  id: number
-  player_id: string
+  id: string
   player_name: string
-  team: string
-  stats?: Record<string, unknown>
-  performance_score: number
-  created_at: string
+  role?: string
+  team?: string
+  metrics_json?: Record<string, any>
+  tendencies_json?: Record<string, any>
+  created_at?: string
+  performance_score?: number
 }
 
 export interface AddPlayerRequest {
@@ -17,12 +18,12 @@ export interface AddPlayerRequest {
 
 export const playersService = {
   // GET /api/players/{id} - Players page
-  get: (id: number) => api.get<Player>(`/api/players/${id}`),
+  get: (id: string) => api.get<Player>(`/api/players/${id}`),
 
   // GET /api/players/
-  list: (skip = 0, limit = 10) =>
-    api.get<{ players: Player[]; total: number }>('/api/players/', {
-      params: { skip, limit },
+  list: (skip = 0, limit = 10, report_id?: string) =>
+    api.get<{ players: Player[]; total: number; report_id?: string }>('/api/players/', {
+      params: { skip, limit, ...(report_id && { report_id }) },
     }),
 
   // POST /api/players/

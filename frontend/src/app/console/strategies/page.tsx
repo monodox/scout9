@@ -1,11 +1,59 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { ConsoleLayout } from '../layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { Lightbulb, Search, Filter, TrendingUp, Shield, Zap, Target, Percent } from 'lucide-react'
+import { Lightbulb, Search, Filter, TrendingUp, Shield, Zap, Target, Percent, RefreshCw } from 'lucide-react'
+import { strategiesService } from '@/services/strategies.service'
 
 export default function Strategies() {
+  const [strategies, setStrategies] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    fetchStrategies()
+  }, [])
+
+  const fetchStrategies = async () => {
+    try {
+      const data = await strategiesService.list(0, 20)
+      setStrategies(data.strategies || [])
+    } catch (err) {
+      console.error('Failed to fetch strategies:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredStrategies = strategies.filter(strategy =>
+    (strategy.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const avgSuccessRate = strategies.length > 0
+    ? Math.round(strategies.reduce((sum, s) => sum + (s.success_rate || 0), 0) / strategies.length)
+    : 0
+
+  const mostCommon = strategies.length > 0
+    ? strategies.sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0))[0]?.name || '-'
+    : '-'
+
+  if (loading) {
+    return (
+      <ConsoleLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </ConsoleLayout>
+    )
+  }
+
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
@@ -26,6 +74,8 @@ export default function Strategies() {
                     type="search"
                     placeholder="Search strategies..."
                     className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
@@ -35,9 +85,6 @@ export default function Strategies() {
                   <option value="defensive">Defensive</option>
                   <option value="economic">Economic</option>
                 </Select>
-                <Button variant="outline" size="icon">
-                  <Filter className="w-4 h-4" />
-                </Button>
               </div>
               <Button>
                 <Lightbulb className="w-4 h-4 mr-2" />
@@ -54,7 +101,7 @@ export default function Strategies() {
                 <div className="flex items-center justify-between mb-4">
                   <Lightbulb className="w-8 h-8 text-primary" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
+                <div className="text-2xl font-bold mb-1">{strategies.length}</div>
                 <div className="text-sm text-muted-foreground">Total Strategies</div>
               </Card>
 
@@ -62,7 +109,7 @@ export default function Strategies() {
                 <div className="flex items-center justify-between mb-4">
                   <TrendingUp className="w-8 h-8 text-green-500" />
                 </div>
-                <div className="text-2xl font-bold mb-1">-</div>
+                <div className="text-2xl font-bold mb-1">{mostCommon}</div>
                 <div className="text-sm text-muted-foreground">Most Common</div>
               </Card>
 
@@ -70,16 +117,16 @@ export default function Strategies() {
                 <div className="flex items-center justify-between mb-4">
                   <Percent className="w-8 h-8 text-blue-500" />
                 </div>
-                <div className="text-2xl font-bold mb-1">-</div>
-                <div className="text-sm text-muted-foreground">Success Rate</div>
+                <div className="text-2xl font-bold mb-1">{avgSuccessRate}%</div>
+                <div className="text-sm text-muted-foreground">Avg Success Rate</div>
               </Card>
 
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <Target className="w-8 h-8 text-purple-500" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
-                <div className="text-sm text-muted-foreground">Win Conditions</div>
+                <div className="text-2xl font-bold mb-1">{strategies.filter(s => s.success_rate >= 70).length}</div>
+                <div className="text-sm text-muted-foreground">High Win Rate</div>
               </Card>
             </div>
           </section>

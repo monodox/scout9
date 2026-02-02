@@ -1,11 +1,61 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { ConsoleLayout } from '../layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { Layers, Search, Filter, TrendingUp, Target, Percent, Shield, Swords } from 'lucide-react'
+import { Layers, Search, Filter, TrendingUp, Target, Percent, Shield, Swords, RefreshCw } from 'lucide-react'
+import { compositionsService } from '@/services/compositions.service'
 
 export default function Compositions() {
+  const [compositions, setCompositions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    fetchCompositions()
+  }, [])
+
+  const fetchCompositions = async () => {
+    try {
+      const data = await compositionsService.list(0, 20)
+      setCompositions(data.compositions || [])
+    } catch (err) {
+      console.error('Failed to fetch compositions:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredCompositions = compositions.filter(comp =>
+    (comp.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const avgWinRate = compositions.length > 0
+    ? Math.round(compositions.reduce((sum, c) => sum + (c.win_rate || 0), 0) / compositions.length)
+    : 0
+
+  const mostPicked = compositions.length > 0
+    ? compositions.sort((a, b) => (b.pick_rate || 0) - (a.pick_rate || 0))[0]?.name || '-'
+    : '-'
+
+  const totalGames = compositions.reduce((sum, c) => sum + (c.games_played || 0), 0)
+
+  if (loading) {
+    return (
+      <ConsoleLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </ConsoleLayout>
+    )
+  }
+
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
@@ -26,6 +76,8 @@ export default function Compositions() {
                     type="search"
                     placeholder="Search compositions..."
                     className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
@@ -35,9 +87,6 @@ export default function Compositions() {
                   <option value="meta">Meta</option>
                   <option value="counter">Counter</option>
                 </Select>
-                <Button variant="outline" size="icon">
-                  <Filter className="w-4 h-4" />
-                </Button>
               </div>
               <Button>
                 <Layers className="w-4 h-4 mr-2" />
@@ -54,7 +103,7 @@ export default function Compositions() {
                 <div className="flex items-center justify-between mb-4">
                   <Layers className="w-8 h-8 text-primary" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
+                <div className="text-2xl font-bold mb-1">{compositions.length}</div>
                 <div className="text-sm text-muted-foreground">Total Compositions</div>
               </Card>
 
@@ -62,15 +111,15 @@ export default function Compositions() {
                 <div className="flex items-center justify-between mb-4">
                   <Percent className="w-8 h-8 text-green-500" />
                 </div>
-                <div className="text-2xl font-bold mb-1">-</div>
-                <div className="text-sm text-muted-foreground">Win Rate</div>
+                <div className="text-2xl font-bold mb-1">{avgWinRate}%</div>
+                <div className="text-sm text-muted-foreground">Avg Win Rate</div>
               </Card>
 
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <TrendingUp className="w-8 h-8 text-blue-500" />
                 </div>
-                <div className="text-2xl font-bold mb-1">-</div>
+                <div className="text-2xl font-bold mb-1">{mostPicked}</div>
                 <div className="text-sm text-muted-foreground">Most Picked</div>
               </Card>
 
@@ -78,8 +127,8 @@ export default function Compositions() {
                 <div className="flex items-center justify-between mb-4">
                   <Target className="w-8 h-8 text-purple-500" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
-                <div className="text-sm text-muted-foreground">Synergies Found</div>
+                <div className="text-2xl font-bold mb-1">{totalGames}</div>
+                <div className="text-sm text-muted-foreground">Total Games</div>
               </Card>
             </div>
           </section>

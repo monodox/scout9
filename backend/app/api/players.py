@@ -12,22 +12,31 @@ router = APIRouter(prefix="/api/players", tags=["players"])
 
 
 @router.get("/", response_model=dict)
-async def list_players(report_id: UUID, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+async def list_players(report_id: Optional[UUID] = None, skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     """
-    List all players analyzed in a scouting report.
+    List all players analyzed in scouting reports.
+    If report_id is provided, filter by that report. Otherwise, return all players.
     This is a derived view - players are extracted from GRID data during scouting.
+    
+    Auto-seeds sample data if database is empty.
     """
-    total = db.query(ReportPlayer).filter(ReportPlayer.report_id == report_id).count()
-    players = (
-        db.query(ReportPlayer)
-        .filter(ReportPlayer.report_id == report_id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    query = db.query(ReportPlayer)
+    
+    if report_id:
+        query = query.filter(ReportPlayer.report_id == report_id)
+    
+    total = query.count()
+    
+    # Auto-seed sample data if database is empty
+    if total == 0:
+        from app.api.test_data import seed_sample_data
+        seed_sample_data(db)
+        total = query.count()
+    
+    players = query.offset(skip).limit(limit).all()
     
     return {
-        "report_id": str(report_id),
+        "report_id": str(report_id) if report_id else None,
         "players": [ReportPlayerResponse.from_orm(p) for p in players],
         "total": total
     }

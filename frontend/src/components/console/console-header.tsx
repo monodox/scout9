@@ -1,7 +1,11 @@
-import { Bell, User, Menu, Info } from 'lucide-react'
+import { Bell, User, Menu, Info, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function ConsoleHeader() {
+  const handleRefresh = () => {
+    window.location.reload()
+  }
+
   return (
     <header className="border-b border-border bg-background">
       <div className="flex h-16 items-center justify-between px-6">
@@ -20,6 +24,10 @@ export function ConsoleHeader() {
         <div className="flex-1" />
 
         <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" onClick={handleRefresh} title="Refresh page">
+            <RefreshCw className="h-5 w-5" />
+          </Button>
+
           <Button variant="ghost" size="sm">
             <Bell className="h-5 w-5" />
           </Button>

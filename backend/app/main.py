@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import scout, report, players, strategies, compositions, system, settings, support, auth
+from app.api import scout, report, players, strategies, compositions, system, settings, support, auth, test_data
 
 app = FastAPI(
     title="Scout9 API",
@@ -30,6 +30,7 @@ app.include_router(compositions.router)
 app.include_router(system.router)
 app.include_router(settings.router)
 app.include_router(support.router)
+app.include_router(test_data.router)  # Test data endpoints for development
 
 @app.get("/")
 def read_root():

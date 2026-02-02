@@ -1,12 +1,51 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ConsoleLayout } from '../layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { FileText, Search, Filter, Download, Share2, Clock, TrendingUp } from 'lucide-react'
+import { FileText, Search, Filter, Download, Share2, Clock, TrendingUp, RefreshCw } from 'lucide-react'
+import { reportService } from '@/services/report.service'
 
 export default function Report() {
+  const [reports, setReports] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    fetchReports()
+  }, [])
+
+  const fetchReports = async () => {
+    try {
+      const data = await reportService.list(0, 20)
+      setReports(data.reports || [])
+    } catch (err) {
+      console.error('Failed to fetch reports:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredReports = reports.filter(report =>
+    (report.title || report.team_name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  if (loading) {
+    return (
+      <ConsoleLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </ConsoleLayout>
+    )
+  }
+
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
@@ -27,6 +66,8 @@ export default function Report() {
                     type="search"
                     placeholder="Search reports..."
                     className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
@@ -35,9 +76,6 @@ export default function Report() {
                   <option value="recent">Recent</option>
                   <option value="archived">Archived</option>
                 </Select>
-                <Button variant="outline" size="icon">
-                  <Filter className="w-4 h-4" />
-                </Button>
               </div>
               <Link to="/console/scout">
                 <Button>
@@ -50,16 +88,52 @@ export default function Report() {
 
           {/* Reports List */}
           <Card className="p-6">
-            <div className="text-center py-12">
-              <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-2">No reports generated yet</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Create your first scouting report to see it here
-              </p>
-              <Link to="/console/scout">
-                <Button>Start Scouting</Button>
-              </Link>
-            </div>
+            {filteredReports.length > 0 ? (
+              <div className="space-y-3">
+                {filteredReports.map((report) => (
+                  <Link key={report.id} to={`/console/report/${report.id}`}>
+                    <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors">
+                      <div className="flex-1">
+                        <div className="font-medium mb-1">{report.title || report.team_name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {report.template_type || 'Standard'} • {new Date(report.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className={`text-sm px-3 py-1 rounded-full ${
+                          report.status === 'completed' 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {report.status}
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={(e) => {
+                          e.preventDefault()
+                          window.open(`/api/report/${report.id}/export/pdf`, '_blank')
+                        }}>
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-2">
+                  {searchQuery ? 'No reports found matching your search' : 'No reports generated yet'}
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {searchQuery ? 'Try a different search term' : 'Create your first scouting report to see it here'}
+                </p>
+                {!searchQuery && (
+                  <Link to="/console/scout">
+                    <Button>Start Scouting</Button>
+                  </Link>
+                )}
+              </div>
+            )}
           </Card>
 
           {/* Report Templates */}

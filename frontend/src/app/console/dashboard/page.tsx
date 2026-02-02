@@ -1,10 +1,50 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ConsoleLayout } from '../layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Activity, TrendingUp, AlertCircle, BarChart3 } from 'lucide-react'
+import { Activity, TrendingUp, AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
+import { systemService } from '@/services/system.service'
+import { reportService } from '@/services/report.service'
 
 export default function Dashboard() {
+  const [overview, setOverview] = useState<any>(null)
+  const [recentReports, setRecentReports] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      const [overviewData, reportsData] = await Promise.all([
+        systemService.getOverview(),
+        reportService.list(0, 5)
+      ])
+      setOverview(overviewData)
+      setRecentReports(reportsData.reports || [])
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <ConsoleLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </ConsoleLayout>
+    )
+  }
+
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
@@ -30,7 +70,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground mb-2">Total Scouts</div>
-                  <div className="text-3xl font-bold">0</div>
+                  <div className="text-3xl font-bold">{overview?.total_scouts || 0}</div>
                 </div>
                 <Activity className="w-8 h-8 text-primary opacity-20" />
               </div>
@@ -40,7 +80,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground mb-2">Reports Generated</div>
-                  <div className="text-3xl font-bold">0</div>
+                  <div className="text-3xl font-bold">{overview?.reports_generated || 0}</div>
                 </div>
                 <BarChart3 className="w-8 h-8 text-primary opacity-20" />
               </div>
@@ -50,7 +90,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground mb-2">Players Tracked</div>
-                  <div className="text-3xl font-bold">0</div>
+                  <div className="text-3xl font-bold">{overview?.players_tracked || 0}</div>
                 </div>
                 <TrendingUp className="w-8 h-8 text-primary opacity-20" />
               </div>
@@ -60,7 +100,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground mb-2">Strategies Analyzed</div>
-                  <div className="text-3xl font-bold">0</div>
+                  <div className="text-3xl font-bold">{overview?.strategies_analyzed || 0}</div>
                 </div>
                 <AlertCircle className="w-8 h-8 text-primary opacity-20" />
               </div>
@@ -71,18 +111,42 @@ export default function Dashboard() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Recent Reports</h2>
-              <Link to="/console/scout">
+              <Link to="/console/report">
                 <Button variant="ghost" size="sm">View All</Button>
               </Link>
             </div>
             <Card className="p-6">
-              <div className="text-center py-12">
-                <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-4">No reports yet. Run a new scout analysis to get started.</p>
-                <Link to="/console/scout">
-                  <Button>Start Your First Scout</Button>
-                </Link>
-              </div>
+              {recentReports.length > 0 ? (
+                <div className="space-y-3">
+                  {recentReports.map((report) => (
+                    <Link key={report.id} to={`/console/report/${report.id}`}>
+                      <div className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-accent transition-colors">
+                        <div>
+                          <div className="font-medium">{report.title || report.team_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(report.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className={`text-sm px-3 py-1 rounded-full ${
+                          report.status === 'completed' 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                        }`}>
+                          {report.status}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground mb-4">No reports yet. Run a new scout analysis to get started.</p>
+                  <Link to="/console/scout">
+                    <Button>Start Your First Scout</Button>
+                  </Link>
+                </div>
+              )}
             </Card>
           </section>
 

@@ -1,11 +1,76 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { ConsoleLayout } from '../layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
-import { Users, Search, Filter, Star, TrendingUp, Award, Target, BarChart3 } from 'lucide-react'
+import { Users, Search, Filter, Star, TrendingUp, Award, Target, BarChart3, RefreshCw } from 'lucide-react'
+import { playersService } from '@/services/players.service'
 
 export default function Players() {
+  const [players, setPlayers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    fetchPlayers()
+  }, [])
+
+  const fetchPlayers = async () => {
+    try {
+      const data = await playersService.list(0, 100)
+      // Calculate performance score from metrics
+      const playersWithScore = (data.players || []).map((player: any) => ({
+        ...player,
+        performance_score: calculatePerformanceScore(player)
+      }))
+      setPlayers(playersWithScore)
+    } catch (err) {
+      console.error('Failed to fetch players:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const calculatePerformanceScore = (player: any): number => {
+    if (!player.metrics_json) return 50
+    const metrics = player.metrics_json
+    
+    // Calculate score based on available metrics
+    let score = 50 // base score
+    
+    if (metrics.kd_ratio) {
+      score += Math.min(metrics.kd_ratio * 10, 30)
+    }
+    if (metrics.consistency_score) {
+      score += metrics.consistency_score * 0.2
+    }
+    if (metrics.win_rate) {
+      score += metrics.win_rate * 0.2
+    }
+    
+    return Math.min(Math.round(score), 100)
+  }
+
+  const filteredPlayers = players.filter(player =>
+    (player.player_name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  if (loading) {
+    return (
+      <ConsoleLayout>
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </ConsoleLayout>
+    )
+  }
+
   return (
     <ConsoleLayout>
       <div className="container mx-auto px-4 py-8">
@@ -26,6 +91,8 @@ export default function Players() {
                     type="search"
                     placeholder="Search players..."
                     className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
@@ -34,8 +101,8 @@ export default function Players() {
                   <option value="tracked">Tracked</option>
                   <option value="favorites">Favorites</option>
                 </Select>
-                <Button variant="outline" size="icon">
-                  <Filter className="w-4 h-4" />
+                <Button variant="outline" size="icon" onClick={fetchPlayers}>
+                  <RefreshCw className="w-4 h-4" />
                 </Button>
               </div>
               <Button>
@@ -45,16 +112,123 @@ export default function Players() {
             </div>
           </Card>
 
-          {/* Players Grid */}
+          {/* Players Table */}
           <Card className="p-6">
-            <div className="text-center py-12">
-              <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-2">No players tracked yet</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Start tracking players to analyze their performance
-              </p>
-              <Button>Add Your First Player</Button>
-            </div>
+            {filteredPlayers.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-3 px-4 font-semibold text-sm">Player</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm">Team</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm">Role</th>
+                      <th className="text-center py-3 px-4 font-semibold text-sm">Performance</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm">Metrics</th>
+                      <th className="text-right py-3 px-4 font-semibold text-sm">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPlayers.map((player) => (
+                      <tr 
+                        key={player.id} 
+                        className="border-b border-border hover:bg-accent transition-colors"
+                      >
+                        <td className="py-4 px-4">
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                              <Users className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <div className="font-medium">{player.player_name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {player.tendencies_json ? `${Object.keys(player.tendencies_json).length} tendencies` : 'No data'}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                            {player.team || 'N/A'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4 text-sm text-muted-foreground">
+                          {player.role || 'Unknown'}
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center justify-center">
+                            <div className="flex items-center">
+                              <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2">
+                                <div 
+                                  className={`h-2 rounded-full ${
+                                    player.performance_score >= 80 
+                                      ? 'bg-green-500' 
+                                      : player.performance_score >= 60 
+                                      ? 'bg-yellow-500' 
+                                      : 'bg-red-500'
+                                  }`}
+                                  style={{ width: `${Math.min(player.performance_score || 0, 100)}%` }}
+                                />
+                              </div>
+                              <span className="text-sm font-medium">{player.performance_score || 0}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="text-sm">
+                            {player.metrics_json && Object.keys(player.metrics_json).length > 0 ? (
+                              <div className="space-y-1">
+                                {player.metrics_json.kd_ratio && (
+                                  <div className="text-xs">K/D: <span className="font-medium">{player.metrics_json.kd_ratio.toFixed(2)}</span></div>
+                                )}
+                                {player.metrics_json.win_rate && (
+                                  <div className="text-xs">WR: <span className="font-medium">{player.metrics_json.win_rate}%</span></div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">No metrics</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button variant="ghost" size="sm">
+                              <Star className="w-4 h-4" />
+                            </Button>
+                            <Link to={`/console/players/${player.id}`}>
+                              <Button variant="ghost" size="sm">
+                                View Details
+                              </Button>
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                  <div>
+                    Showing {filteredPlayers.length} of {players.length} players
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Last updated: {new Date().toLocaleTimeString()}</span>
+                    <Button variant="ghost" size="sm" onClick={fetchPlayers}>
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Users className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground mb-2">
+                  {searchQuery ? 'No players found matching your search' : 'No players tracked yet'}
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {searchQuery ? 'Try a different search term' : 'Start tracking players to analyze their performance'}
+                </p>
+                {!searchQuery && <Button>Add Your First Player</Button>}
+              </div>
+            )}
           </Card>
 
           {/* Performance Metrics */}
@@ -66,7 +240,7 @@ export default function Players() {
                   <Target className="w-8 h-8 text-primary" />
                   <Star className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
+                <div className="text-2xl font-bold mb-1">{players.filter(p => p.performance_score >= 80).length}</div>
                 <div className="text-sm text-muted-foreground">Top Performers</div>
               </Card>
 
@@ -75,7 +249,7 @@ export default function Players() {
                   <TrendingUp className="w-8 h-8 text-primary" />
                   <Star className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
+                <div className="text-2xl font-bold mb-1">{players.filter(p => p.performance_score >= 70 && p.performance_score < 80).length}</div>
                 <div className="text-sm text-muted-foreground">Rising Stars</div>
               </Card>
 
@@ -84,7 +258,7 @@ export default function Players() {
                   <Award className="w-8 h-8 text-primary" />
                   <Star className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
+                <div className="text-2xl font-bold mb-1">{players.filter(p => p.performance_score >= 90).length}</div>
                 <div className="text-sm text-muted-foreground">MVP Candidates</div>
               </Card>
 
@@ -93,7 +267,7 @@ export default function Players() {
                   <BarChart3 className="w-8 h-8 text-primary" />
                   <Star className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <div className="text-2xl font-bold mb-1">0</div>
+                <div className="text-2xl font-bold mb-1">{players.length}</div>
                 <div className="text-sm text-muted-foreground">Tracked Players</div>
               </Card>
             </div>
