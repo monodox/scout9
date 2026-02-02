@@ -30,8 +30,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     class Config:
-        env_file = "../../.env.local"
+        env_file = ".env.local"
+        env_file_encoding = "utf-8"
         case_sensitive = True
+        extra = "ignore"  # Ignore extra env vars like VITE_*
 
 
 settings = Settings()
